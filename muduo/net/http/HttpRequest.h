@@ -176,7 +176,7 @@ class HttpRequest : public muduo::copyable
   void appendToBody(std::string str)
   {
     body_ += str;
-    receive_number_ += str.size();
+    receive_number_ += int(str.size());
   }
 
   const std::string getBody() const

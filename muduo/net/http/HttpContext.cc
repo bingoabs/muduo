@@ -9,6 +9,7 @@
 
 #include "muduo/net/Buffer.h"
 #include "muduo/net/http/HttpContext.h"
+#include <iostream>
 
 using namespace muduo;
 using namespace muduo::net;
@@ -112,10 +113,12 @@ bool HttpContext::parseRequest(Buffer* buf, Timestamp receiveTime)
     else if (state_ == kExpectBody)
     {
       int left_length = request_.getLeftBodyLength();
+      std::cout << "left_length: " << left_length << std::endl;
       std::string temp = buf->retrieveAllAsString();
       request_.appendToBody(temp);
-      if(temp.size() >= left_length)
-        hasMore = false;
+      if(int(temp.size()) >= left_length)
+        state_ = kGotAll;
+      hasMore = false;
     }
   }
   return ok;
