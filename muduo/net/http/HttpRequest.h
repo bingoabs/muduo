@@ -35,6 +35,7 @@ class HttpRequest : public muduo::copyable
   {
     kUnknown, kHttp10, kHttp11
   };
+  std::string ContentLength = "Content-Length";
 
   HttpRequest()
     : method_(kInvalid),
@@ -172,6 +173,26 @@ class HttpRequest : public muduo::copyable
     headers_.swap(that.headers_);
   }
 
+  void appendToBody(std::string str)
+  {
+    body_ += str;
+    receive_number_ += str.size();
+  }
+
+  const std::string getBody() const
+  {
+    return body_;
+  }
+
+  int getLeftBodyLength()
+  {
+    if(headers_.count(ContentLength) == 0)
+      return 0;
+    int content_length = atoi(headers_[ContentLength].c_str());
+    int length = content_length - receive_number_;
+    return length > 0 ? length : 0;
+  }
+
  private:
   Method method_;
   Version version_;
@@ -179,6 +200,8 @@ class HttpRequest : public muduo::copyable
   string query_;
   Timestamp receiveTime_;
   std::map<string, string> headers_;
+  std::string body_;
+  int receive_number_ = 0;
 };
 
 }  // namespace net
